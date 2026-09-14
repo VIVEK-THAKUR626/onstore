@@ -1,11 +1,19 @@
 const express = require("express");
+const cors = require("cors");
 
 const app = express();
 
 const PORT = 3000;
 
-app.get("/",(req,res)=>{
-    res.send("This is the onstore backend")
+app.use(cors());
+app.use(express.json())
+
+app.post("/api/auth/signup", (req,res)=>{
+    console.log(req.body);
+
+    res.json({
+        message: "Account created successfully"
+    })
 })
 
 app.listen(PORT, ()=>{
