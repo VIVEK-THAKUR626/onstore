@@ -15,7 +15,7 @@ export function SignUp(){
             return;
         }
         if(password.length < 8){
-            alert("Password must be 8 characters long");
+            alert("Password must be atleast 8 characters long");
             return;
         }
         if(password !== confirmPassword){
@@ -37,7 +37,8 @@ export function SignUp(){
 
         const data = await response.json();
 
-        alert(data.message)
+        alert(data.message);
+
     }
 
     return(
