@@ -1,19 +1,38 @@
 import { useState } from "react"
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 
 export function SignIn(){
+    const navigate = useNavigate();
     const [email,setEmail] = useState("");
     const [password,setPassword] = useState("");
 
-    function handleSubmit(e){
+    async function handleSubmit(e){
         e.preventDefault();
 
-        if(password.length < 8){
-            alert("Password must be 8 characters long");
-            return;
-        }
+        const response = await fetch("http://localhost:3000/api/auth/signin",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            credentials:"include",
+            body: JSON.stringify({
+                email,
+                password
+            })
+        })
 
-        alert("Sign in successful")
+        const data = await response.json();
+        
+        if(response.ok){
+            navigate("/")
+        }else{
+            alert(data.message);
+        }
+        
+        setEmail("");
+        setPassword("");
+
+
     }
     return(
         <div className="flex flex-col absolute top-[30%] left-[40%] border rounded-2xl size-60 p-3">

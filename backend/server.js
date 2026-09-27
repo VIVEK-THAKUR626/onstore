@@ -3,13 +3,20 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const User = require("./models/User");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+const authenticateToken = require("./middlewares/auth");
 require("dotenv").config();
 
 const app = express();
 const PORT = 3000;
 
-app.use(cors());
-app.use(express.json())
+app.use(cors({
+    origin:"http://localhost:5173",
+    credentials: true
+}));
+app.use(express.json());
+app.use(cookieParser());
 
 
 mongoose.connect(process.env.MONGODB_URI)
@@ -67,6 +74,63 @@ app.post("/api/auth/signup", async (req,res)=>{
 
     res.status(201).json({
         message: "Account created successfully"
+    })
+})
+
+app.post("/api/auth/signin", async (req, res) => {
+    const { email, password } = req.body;
+
+    const normalisedEmail = (email || "").trim().toLowerCase();
+
+    if (!password || password.length < 8) {
+        return res.status(400).json({
+            message: "password must be 8 characters long"
+        });
+    }
+
+    const user = await User.findOne({ email: normalisedEmail });
+
+    if (!user) {
+        return res.status(400).json({
+            message: "user doesn't exist"
+        });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+        return res.status(400).json({
+            message: "password is invalid"
+        });
+    }
+
+    const token = jwt.sign(
+        { id: user._id, username: user.username },
+        process.env.JWT_KEY,
+        { expiresIn: "1d" }
+    );
+
+    res.cookie("token", token, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000
+    });
+
+    res.status(200).json({
+        message: "sign in successful",
+        username: user.username
+    });
+})
+
+app.post("/api/auth/signout", (req,res)=>{
+    res.clearCookie("token");
+    res.status(200).json({
+        message:"Signed out successfully"
+    })
+})
+
+app.get("/api/auth/me", authenticateToken, (req,res)=>{
+    res.status(200).json({
+        user: req.user
     })
 })
 

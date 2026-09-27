@@ -38,6 +38,11 @@ export function SignUp(){
         const data = await response.json();
 
         alert(data.message);
+        
+        setUsername("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
 
     }
 
