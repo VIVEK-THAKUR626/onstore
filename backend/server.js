@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const User = require("./models/User");
+const Product = require("./models/Product");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
@@ -133,6 +134,17 @@ app.get("/api/auth/me", authenticateToken, (req,res)=>{
         user: req.user
     })
 })
+
+app.get("/api/products", async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 0;
+        const skip = parseInt(req.query.skip) || 0;
+        const products = await Product.find({}).skip(skip).limit(limit);
+        res.status(200).json(products);
+    } catch (err) {
+        res.status(500).json({ message: "Failed to fetch products", error: err.message });
+    }
+});
 
 app.listen(PORT, ()=>{
     console.log(`Server running on http://localhost:${PORT}`)
