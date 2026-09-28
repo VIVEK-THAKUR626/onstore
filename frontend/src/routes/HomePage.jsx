@@ -8,6 +8,13 @@ export function HomePage(){
     const [products,setProducts] = useState([]);
     const [hasMore,setHasMore] = useState(true);
     const [loadingMore,setLoadingMore] = useState(false);
+    const [searchQuery,setSearchQuery] = useState("");
+
+    const filteredProducts = searchQuery.trim()
+        ? products.filter(product =>
+            product.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+          )
+        : products;
 
     useEffect(()=>{
         async function checkAuth(){
@@ -81,30 +88,45 @@ export function HomePage(){
             </header>
             <main className="flex flex-col justify-evenly">
                 <section className="flex items-center justify-evenly">
-                    <input className="w-[70%] border-4 border-black rounded-2xl p-1"/>
-                    <button className="border-2 border-black rounded-2xl p-2">Search</button>
+                    <input
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search products..."
+                        className="w-[70%] border-4 border-black rounded-2xl p-1"
+                    />
+                    <button
+                        onClick={() => setSearchQuery(searchQuery)}
+                        className="border-2 border-black rounded-2xl p-2"
+                    >Search</button>
                 </section>
                 <section className="flex flex-col items-center">
                     <h1>Featured Items</h1>
                     <div className="flex flex-wrap justify-evenly items-center">
                         {
-                            products.map(product => (
+                            filteredProducts.length > 0
+                            ? filteredProducts.map(product => (
                                 <FeaturedItemCard 
                                     key={product._id || product.id}
+                                    _id={product._id}
                                     name={product.name}
                                     imageUrl={product.imageUrl}
                                     category={product.category}
                                     price={product.price}
                                     stock={product.stock}
                                     rating={product.rating}
+                                    showButtons={true}
+                                    isSignedIn={!!user}
                                 />
                             ))
+                            : searchQuery.trim() && (
+                                <p className="text-xl font-semibold text-gray-500 my-10">Product not available</p>
+                            )
                         }
                     </div>
                 </section>
             </main>
             <footer className="flex justify-center items-center py-8">
-                {hasMore ? (
+                {!searchQuery.trim() && (hasMore ? (
                     <button 
                         onClick={handleShowMore}
                         disabled={loadingMore}
@@ -114,7 +136,7 @@ export function HomePage(){
                     </button>
                 ) : (
                     <p className="text-gray-500 font-semibold text-lg">you have reached the end</p>
-                )}
+                ))}
             </footer>
         </div>
     )

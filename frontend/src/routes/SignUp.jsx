@@ -1,7 +1,8 @@
 import { useState } from "react"
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export function SignUp(){
+    const navigate = useNavigate();
     const [username,setUsername] = useState("");
     const [email,setEmail] = useState("");
     const [password,setPassword] = useState("");
@@ -37,12 +38,11 @@ export function SignUp(){
 
         const data = await response.json();
 
-        alert(data.message);
-        
-        setUsername("");
-        setEmail("");
-        setPassword("");
-        setConfirmPassword("");
+        if (response.ok) {
+            navigate("/signin");
+        } else {
+            alert(data.message);
+        }
 
     }
 
